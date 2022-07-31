@@ -13,5 +13,4 @@ Linux-*
 *.suo
 *.user
 *.vcxproj
-src/brdf/release
-src/brdf/debug
+build/
