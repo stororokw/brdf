@@ -52,13 +52,12 @@ infringement.
 #include <string>
 #include <vector>
 
-#include "SharedContextGLWidget.h"
-
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include "glad/glad.h"
 
 class DGLShader;
 class BRDFBase;

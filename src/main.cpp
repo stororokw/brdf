@@ -47,15 +47,9 @@ infringement.
 //#include <QApplication>
 //#include <QDesktopWidget>
 //#include <QMessageBox>
-//#include "MainWindow.h"
+#include "MainWindow.h"
 //#include "ParameterWindow.h"
-#define GLFW_INCLUDE_NONE
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
 #include "Paths.h"
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/string_cast.hpp"
@@ -122,85 +116,12 @@ int main(int argc, char *argv[])
     std::string wellsFilename = getProbesPath() + "wells.hdr";
     float* data = stbi_loadf(wellsFilename.c_str(), &imgWidth, &imgHeight, &imgChannels, 3);
 
-    if (!glfwInit())
-    {
-        // Initialization failed
-        return -1;
-    }
-
-    glfwWindowHint(GLFW_MAXIMIZED, TRUE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* window = glfwCreateWindow(640, 480, "BRDF Explorer", NULL, NULL);
-    glfwMakeContextCurrent(window);
-    gladLoadGL();
-    glfwSwapInterval(1);
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-
-    ImGui::StyleColorsDark();
-
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
-
-    const char* glsl_version = "#version 130";
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-
-    glm::vec3 test(1.0f);
-    glm::vec3 test1(2.0f);
-
-    glm::vec3 result = test + test1;
-    std::cout << glm::to_string(result) << std::endl;
-
-    while (!glfwWindowShouldClose(window))
-    {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        glViewport(0, 0, width, height);
-        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::ShowDemoWindow();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-
-    glfwDestroyWindow(window);
-
     // center the window in the middle of the default screen
     //QDesktopWidget desktopWidget;
     //QRect rect = desktopWidget.screenGeometry();
     //rect.adjust( 60, 60, -60, -60 );
 
-    //MainWindow main;
-    //main.setGeometry(rect);
-    //main.show();
-    //main.refresh();
-    
-    
+    MainWindow main;
     // open all BRDFs passed in on the commandline
     if( argc > 1 )
     {
@@ -209,7 +130,6 @@ int main(int argc, char *argv[])
             files.push_back( std::string(argv[i]) );
         //main.getParameterWindow()->openBRDFFiles( files );
     }
-    
-    return 0;
-    //return app.exec();
+
+    main.Run();
 }

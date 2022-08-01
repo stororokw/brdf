@@ -45,35 +45,66 @@ infringement.
 
 #ifndef MAIMWINDOW_H
 #define MAIMWINDOW_H
+#include <vector>
+#include <string>
+#include <glad/glad.h> 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "BRDFBase.h"
 
-#include <QMainWindow>
+#include <ShObjIdl_core.h>
 
-class ParameterWindow;
-class ImageSliceWindow;
-class Plot3DWidget;
-class PlotPolarWidget;
-class LitSphereWindow;
-class PlotCartesianWindow;
-class IBLWindow;
-class ViewerWindow;
-class ShowingDockWidget;
+//class ParameterWindow;
+//class ImageSliceWindow;
+//class Plot3DWidget;
+//class PlotPolarWidget;
+//class LitSphereWindow;
+//class PlotCartesianWindow;
+//class IBLWindow;
+//class ViewerWindow;
+//class ShowingDockWidget;
 
-class MainWindow : public QMainWindow
+
+class MainWindow
 {
-    Q_OBJECT
-
 public:
     MainWindow();
     ~MainWindow();
 
-    void refresh();
+    void Refresh();
 
-    ParameterWindow* getParameterWindow() { return paramWnd; }
+    void About();
 
-private slots:
-    void about();
-
+    void OpenBRDFFile(std::string filename, bool emitChanges);
+    void DockSpace(bool* pOpen);
+    void Run();
 private:
+    GLFWwindow*                 mWindow;
+    std::vector<BRDFBase*>      mBrdfs;
+    std::vector<brdfPackage>    mBrdfPackages;
+
+    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+    static void glfw_error_callback(int error, const char* description)
+    {
+        fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+    }
+
+    static void GLAPIENTRY
+        MessageCallback(GLenum source,
+            GLenum type,
+            GLuint id,
+            GLenum severity,
+            GLsizei length,
+            const GLchar* message,
+            const void* userParam);
+
+    static bool OpenDialogBox(std::vector<COMDLG_FILTERSPEC> rgSpec, std::wstring& fileName, bool& success);
+
+#if 0
     ParameterWindow* paramWnd;
     Plot3DWidget* viewer3D;
     PlotPolarWidget* viewer2D;
@@ -87,6 +118,8 @@ private:
     PlotCartesianWindow* cartesianThetaD;
     PlotCartesianWindow* cartesianThetaH;
     PlotCartesianWindow* cartesianAlbedo;
+#endif
 };
+
 
 #endif

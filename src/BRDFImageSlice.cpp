@@ -73,7 +73,7 @@ BRDFImageSlice::BRDFImageSlice()
 BRDFImageSlice::~BRDFImageSlice()
 {
     printf( "glDeleteTextures( 1, &texID );\n" );
-    glf->glDeleteTextures( 1, &texID );
+    glDeleteTextures( 1, &texID );
 }
 
 
@@ -110,16 +110,16 @@ void BRDFImageSlice::initGL()
     
 
     // create the texture id
-    glf->glGenTextures( 1, &texID );
-    glf->glBindTexture( GL_TEXTURE_2D, texID );
+    glGenTextures( 1, &texID );
+    glBindTexture( GL_TEXTURE_2D, texID );
 
     // turn on linear filtering
-    glf->glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    glf->glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 
     // load the data
-    glf->glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGB, GL_FLOAT, imageSliceData );
-    glf->glBindTexture( GL_TEXTURE_2D, 0 );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGB, GL_FLOAT, imageSliceData );
+    glBindTexture( GL_TEXTURE_2D, 0 );
 
     // don't need to keep it anymore
     delete[] imageSliceData;

@@ -43,24 +43,73 @@ implied warranties of merchantability, fitness for a particular purpose and non-
 infringement.
 */
 
-#include <QMenuBar>
-#include <QMessageBox>
+
 #include "MainWindow.h"
-#include "ParameterWindow.h"
-#include "PlotCartesianWidget.h"
-#include "Plot3DWidget.h"
-#include "PlotPolarWidget.h"
-#include "LitSphereWindow.h"
-#include "PlotCartesianWindow.h"
-#include "ImageSliceWindow.h"
-#include "IBLWindow.h"
-#include "ShowingDockWidget.h"
-#include "ViewerWindow.h"
+
+#include <iostream>
+//#include "ParameterWindow.h"
+//#include "PlotCartesianWidget.h"
+//#include "Plot3DWidget.h"
+//#include "PlotPolarWidget.h"
+//#include "LitSphereWindow.h"
+//#include "PlotCartesianWindow.h"
+//#include "ImageSliceWindow.h"
+//#include "IBLWindow.h"
+//#include "ShowingDockWidget.h"
+//#include "ViewerWindow.h"
 
 
 
 MainWindow::MainWindow()
 {
+    glfwSetErrorCallback(glfw_error_callback);
+
+    if (!glfwInit())
+    {
+        std::cout << "Failed to initialize GLFW" << std::endl;
+        glfwTerminate();
+        return;
+    }
+    glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    mWindow = glfwCreateWindow(800, 600, "BRDF Explorer", NULL, NULL);
+
+    if (mWindow == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return;
+    }
+
+    glfwMakeContextCurrent(mWindow);
+    gladLoadGL();
+    glfwSwapInterval(1);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+
+    ImGui::StyleColorsDark();
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
+    const char* glsl_version = "#version 130";
+    ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    glfwSetFramebufferSizeCallback(mWindow, framebuffer_size_callback);
+
+#if 0
     setWindowTitle( "BRDF Explorer" );
 
     // create the parameter window
@@ -170,15 +219,23 @@ MainWindow::MainWindow()
 
     // make sure everything has the correct incident direction param values at the start
     paramWnd->emitIncidentDirectionChanged();
+#endif
 }
 
 
 MainWindow::~MainWindow()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(mWindow);
+
 }
 
-void MainWindow::refresh()
+void MainWindow::Refresh()
 {
+#if 0
     viewer2D->updateGL();
     viewer3D->updateGL();
     viewerSphere->getWidget()->updateGL();
@@ -188,11 +245,209 @@ void MainWindow::refresh()
     cartesianThetaV->getWidget()->updateGL();
     imageSlice->getWidget()->updateGL();
     ibl->getWidget()->updateGL();
+#endif
 }
 
-void MainWindow::about()
+void MainWindow::About()
 {
-    QString copyright = "Copyright Disney Enterprises, Inc. All rights reserved.";
-    QMessageBox::about( this, "BRDF Explorer", copyright );
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("DunDun", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Copyright Disney Enterprises, Inc. All rights reserved.");
+        ImGui::EndPopup();
+    }
+}
 
+void MainWindow::OpenBRDFFile(std::string filename, bool emitChanges)
+{
+
+}
+
+void MainWindow::DockSpace(bool* pOpen)
+{
+        static bool opt_fullscreen = true;
+        static bool opt_padding = false;
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+        // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+        // because it would be confusing to have two docking targets within each others.
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+        if (opt_fullscreen)
+        {
+            const ImGuiViewport* viewport = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(viewport->WorkPos);
+            ImGui::SetNextWindowSize(viewport->WorkSize);
+            ImGui::SetNextWindowViewport(viewport->ID);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+            window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+        }
+        else
+        {
+            dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+        }
+
+        if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+        {
+            window_flags |= ImGuiWindowFlags_NoBackground;
+        }
+
+        if (!opt_padding)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+        }
+
+        if (ImGui::Begin("DockSpace Demo", pOpen, window_flags))
+        {
+
+            if (!opt_padding)
+            {
+                ImGui::PopStyleVar();
+            }
+
+            if (opt_fullscreen)
+            {
+                ImGui::PopStyleVar(2);
+            }
+
+            // Submit the DockSpace
+            ImGuiIO& io = ImGui::GetIO();
+            if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+            {
+                ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+                ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+            }
+            else
+            {
+                //ShowDockingDisabledMessage();
+            }
+
+            if (ImGui::BeginMenuBar())
+            {
+                if (ImGui::BeginMenu("File"))
+                {
+                    if (ImGui::MenuItem("Open BRDF...", "CTRL+O", false, pOpen != NULL))
+                    {
+                        bool success = false;
+                        std::vector<COMDLG_FILTERSPEC> spec = { { L"BRDF Files (*.brdf *.binary *.dat *.bparam *.bsdf)", L"*.brdf;*.binary;*.dat;*.bparam;*.bsdf" } };
+                        std::wstring fileName;
+
+                        OpenDialogBox(spec, fileName, success);
+                        if (success)
+                        {
+                            std::string name(fileName.begin(), fileName.end());
+                            OpenBRDFFile(name, false);
+                        }
+                    }
+
+                    if (ImGui::MenuItem("Close", "CTRL+Q", false, pOpen != NULL))
+                    {
+                        glfwSetWindowShouldClose(mWindow, true);
+                    }
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Utilities"))
+                {
+                    if (ImGui::MenuItem("Reload Auxiliary Shaders", nullptr, false, pOpen != NULL))
+                    {
+
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Help"))
+                {
+                    if (ImGui::MenuItem("About...", nullptr, false, pOpen != NULL))
+                    {
+                        ImGui::OpenPopup("DunDun");
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                ImGui::EndMenuBar();
+            }
+
+            ImGui::End();
+        }
+}
+
+void MainWindow::Run()
+{
+    while (!glfwWindowShouldClose(mWindow))
+    {
+        glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glfwPollEvents();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        static bool showDemoWindow = true;
+        static bool dockspace = true;
+
+        DockSpace(&dockspace);
+
+        ImGui::ShowDemoWindow(&showDemoWindow);
+
+        ImGui::Render();
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glfwSwapBuffers(mWindow);
+    }
+}
+void MainWindow::framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+void GLAPIENTRY MainWindow::MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+        (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+        type, severity, message);
+}
+
+bool MainWindow::OpenDialogBox(std::vector<COMDLG_FILTERSPEC> rgSpec, std::wstring& fileName, bool& success)
+{
+    PWSTR pszFilePath = nullptr;
+
+    HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    if (SUCCEEDED(hr))
+    {
+        IFileOpenDialog* pFileOpen;
+
+        hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, reinterpret_cast<void**>(&pFileOpen));
+
+        if (SUCCEEDED(hr))
+        {
+            pFileOpen->SetFileTypes(rgSpec.size(), &rgSpec[0]);
+            hr = pFileOpen->Show(NULL);
+            if (SUCCEEDED(hr))
+            {
+                IShellItem* pItem;
+                hr = pFileOpen->GetResult(&pItem);
+                if (SUCCEEDED(hr))
+                {
+                    hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+                    if (SUCCEEDED(hr))
+                    {
+                        success = true;
+                        LPWSTR a;
+                        pItem->GetDisplayName(SIGDN_FILESYSPATH, &a);
+                        fileName = a;
+                    }
+                    pItem->Release();
+                }
+            }
+            pFileOpen->Release();
+        }
+        CoUninitialize();
+    }
+    return true;
 }

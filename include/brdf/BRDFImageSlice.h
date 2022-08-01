@@ -50,7 +50,7 @@ infringement.
 
 #include "BRDFBase.h"
 
-class BRDFImageSlice : public BRDFBase, public GLContext
+class BRDFImageSlice : public BRDFBase
 {
 public:
 

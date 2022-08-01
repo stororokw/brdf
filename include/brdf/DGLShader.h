@@ -115,10 +115,10 @@ disable() also disables all the bound textures unless you pass in false.
 #include <string>
 #include <vector>
 
-#include "SharedContextGLWidget.h"
+#include "glad\glad.h"
 
 
-class DGLShader : public GLContext
+class DGLShader
 {
 private:
 

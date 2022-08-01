@@ -134,7 +134,7 @@ bool DGLShader::compileAndAttachShader( GLuint& shaderID, GLenum shaderType, con
 
     // create this shader if it hasn't been created yet
     if( !shaderID )
-        shaderID = glf->glCreateShader( shaderType );
+        shaderID = glCreateShader( shaderType );
 
     // If a shader was passed in, just use that. Otherwise try and load from the filename.
     if( !contents.length() ) {
@@ -148,12 +148,12 @@ bool DGLShader::compileAndAttachShader( GLuint& shaderID, GLenum shaderType, con
 
     // try to compile the shader
     const char* source = contents.c_str();
-    glf->glShaderSource( shaderID, 1, &source, NULL );
-    glf->glCompileShader( shaderID );
+    glShaderSource( shaderID, 1, &source, NULL );
+    glCompileShader( shaderID );
 
     // if it didn't work, print the error message
     GLint compileStatus;
-    glf->glGetShaderiv( shaderID, GL_COMPILE_STATUS, &compileStatus );
+    glGetShaderiv( shaderID, GL_COMPILE_STATUS, &compileStatus );
     if( !compileStatus ) {
 
         // perhaps print the linker error
@@ -161,11 +161,11 @@ bool DGLShader::compileAndAttachShader( GLuint& shaderID, GLenum shaderType, con
 
             // get the length of the error message
             GLint errorMessageLength;
-            glf->glGetShaderiv( shaderID, GL_INFO_LOG_LENGTH, &errorMessageLength );
+            glGetShaderiv( shaderID, GL_INFO_LOG_LENGTH, &errorMessageLength );
 
             // get the error message itself
             char* errorMessage = new char[errorMessageLength];
-            glf->glGetShaderInfoLog( shaderID, errorMessageLength, &errorMessageLength, errorMessage );
+            glGetShaderInfoLog( shaderID, errorMessageLength, &errorMessageLength, errorMessage );
 
             // print the error
             if( filename.length() )
@@ -177,9 +177,9 @@ bool DGLShader::compileAndAttachShader( GLuint& shaderID, GLenum shaderType, con
             // also display shader source
             {
                 GLint length;
-                glf->glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &length);
+                glGetShaderiv(shaderID, GL_SHADER_SOURCE_LENGTH, &length);
                 GLchar *source= new GLchar [length];
-                glf->glGetShaderSource(shaderID, length, NULL, source);
+                glGetShaderSource(shaderID, length, NULL, source);
 
                 printf("%s\n", source);
                 delete [] source;
@@ -195,7 +195,7 @@ bool DGLShader::compileAndAttachShader( GLuint& shaderID, GLenum shaderType, con
     }
 
     // attach it to the program object
-    glf->glAttachShader( _programID, shaderID );
+    glAttachShader( _programID, shaderID );
 
     return true;
 }
@@ -205,22 +205,22 @@ void DGLShader::clear()
 {
     // delete the different shader types
     if( _vertexShaderID ) {
-        glf->glDetachShader( _programID, _vertexShaderID );
-        glf->glDeleteShader( _vertexShaderID );
+        glDetachShader( _programID, _vertexShaderID );
+        glDeleteShader( _vertexShaderID );
     }
 
     if( _fragmentShaderID ) {
-        glf->glDetachShader( _programID, _fragmentShaderID );
-        glf->glDeleteShader( _fragmentShaderID );
+        glDetachShader( _programID, _fragmentShaderID );
+        glDeleteShader( _fragmentShaderID );
     }
 
     if( _geometryShaderID ) {
-        glf->glDetachShader( _programID, _geometryShaderID );
-        glf->glDeleteShader( _geometryShaderID );
+        glDetachShader( _programID, _geometryShaderID );
+        glDeleteShader( _geometryShaderID );
     }
 
     // finally, delete the program object itself
-    glf->glDeleteProgram( _programID );
+    glDeleteProgram( _programID );
 
     // reset the IDs
     _vertexShaderID = 0;
@@ -235,7 +235,7 @@ bool DGLShader::create( bool linkNow )
     _ready = false;
 
     if( !_programID )
-        _programID = glf->glCreateProgram();
+        _programID = glCreateProgram();
 
     // compile and attach the different shader objects
     if( !compileAndAttachShader( _vertexShaderID, GL_VERTEX_SHADER, "Vertex Shader", _vertexShaderFilename, _vertexShaderString ) )
@@ -257,11 +257,11 @@ bool DGLShader::create( bool linkNow )
 bool DGLShader::link()
 {
     // link the different shaders that are attached to the program object
-    glf->glLinkProgram( _programID );
+    glLinkProgram( _programID );
 
     // did the link work?
     GLint linkedOK = 0;
-    glf->glGetProgramiv( _programID, GL_LINK_STATUS, &linkedOK);
+    glGetProgramiv( _programID, GL_LINK_STATUS, &linkedOK);
 
     if( !linkedOK ) {
 
@@ -270,11 +270,11 @@ bool DGLShader::link()
 
             // get the length of the error message
             GLint errorMessageLength;
-            glf->glGetProgramiv( _programID, GL_INFO_LOG_LENGTH, &errorMessageLength );
+            glGetProgramiv( _programID, GL_INFO_LOG_LENGTH, &errorMessageLength );
 
             // get the error message itself
             char* errorMessage = new char[errorMessageLength];
-            glf->glGetProgramInfoLog( _programID, errorMessageLength, &errorMessageLength, errorMessage );
+            glGetProgramInfoLog( _programID, errorMessageLength, &errorMessageLength, errorMessage );
 
             // print it
             printf( "GLSL Linker Error:\n" );
@@ -305,7 +305,7 @@ void DGLShader::reload()
 void DGLShader::enable()
 {
     // enable the shader
-    glf->glUseProgram( _programID );
+    glUseProgram( _programID );
 
     // reset the auto-texture binding stuff
     _firstAvailableTextureUnit = 0;
@@ -317,7 +317,7 @@ bool DGLShader::setUniformTexture( const char* textureName, GLint textureID, GLe
 {
     int textureUnitToUse = 0;
 
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, textureName );
+    GLint uniformLocation = glGetUniformLocation( _programID, textureName );
     if( uniformLocation == -1 )
         return false;
 
@@ -352,13 +352,13 @@ bool DGLShader::setUniformTexture( const char* textureName, GLint textureID, GLe
     _boundTextures[textureUnitToUse] = tex;
 
     // setup the actual texture
-    glf->glUniform1i( uniformLocation, textureUnitToUse );
-    glf->glActiveTexture( GL_TEXTURE0 + textureUnitToUse );
-    glf->glBindTexture( target, textureID );
+    glUniform1i( uniformLocation, textureUnitToUse );
+    glActiveTexture( GL_TEXTURE0 + textureUnitToUse );
+    glBindTexture( target, textureID );
 
     // potentially enable it (this is an option because enabling certain texture types breaks things)
     if( enableTextureTarget )
-        glf->glEnable( target );
+        glEnable( target );
 
     return true;
 }
@@ -367,7 +367,7 @@ bool DGLShader::setUniformTexture( const char* textureName, GLint textureID, GLe
 void DGLShader::disable( bool disableTextureUnits )
 {
     // disable the shader
-    glf->glUseProgram(0);
+    glUseProgram(0);
 
     // possibly disable the textures that were bound to this shader
     if( disableTextureUnits ) {
@@ -387,69 +387,69 @@ void DGLShader::disable( bool disableTextureUnits )
 
 void DGLShader::disableTexture( GLenum target, int unit )
 {
-    glf->glActiveTexture( GL_TEXTURE0 + unit );
+    glActiveTexture( GL_TEXTURE0 + unit );
     //glDisable( target );
-    glf->glBindTexture( target, 0 );
+    glBindTexture( target, 0 );
 }
 
 
 void DGLShader::setUniformFloat( const char* uniformName, float a )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform1f( uniformLocation, a );
+    glUniform1f( uniformLocation, a );
 }
 
 
 void DGLShader::setUniformFloat( const char* uniformName, float a, float b )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform2f( uniformLocation, a, b );
+    glUniform2f( uniformLocation, a, b );
 }
 
 
 void DGLShader::setUniformFloat( const char* uniformName, float a, float b, float c )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform3f( uniformLocation, a, b, c );
+    glUniform3f( uniformLocation, a, b, c );
 }
 
 
 void DGLShader::setUniformFloat( const char* uniformName, float a, float b, float c, float d )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform4f( uniformLocation, a, b, c, d );
+    glUniform4f( uniformLocation, a, b, c, d );
 }
 
 
 void DGLShader::setUniformFloatArray( const char* uniformName, int elementCount, int arrayLength, float* arrayData )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
     if( elementCount == 1 )
-        glf->glUniform1fv( uniformLocation, arrayLength, arrayData );
+        glUniform1fv( uniformLocation, arrayLength, arrayData );
 
     else if( elementCount == 2 )
-        glf->glUniform2fv( uniformLocation, arrayLength, arrayData );
+        glUniform2fv( uniformLocation, arrayLength, arrayData );
 
     else if( elementCount == 3 )
-        glf->glUniform3fv( uniformLocation, arrayLength, arrayData );
+        glUniform3fv( uniformLocation, arrayLength, arrayData );
 
     else if( elementCount == 4 )
-        glf->glUniform4fv( uniformLocation, arrayLength, arrayData );
+        glUniform4fv( uniformLocation, arrayLength, arrayData );
 
     else return;
 }
@@ -457,60 +457,60 @@ void DGLShader::setUniformFloatArray( const char* uniformName, int elementCount,
 
 void DGLShader::setUniformInt( const char* uniformName, int a )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform1i( uniformLocation, a );
+    glUniform1i( uniformLocation, a );
 }
 
 
 void DGLShader::setUniformInt( const char* uniformName, int a, int b )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform2i( uniformLocation, a, b );
+    glUniform2i( uniformLocation, a, b );
 }
 
 void DGLShader::setUniformInt( const char* uniformName, int a, int b, int c )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform3i( uniformLocation, a, b, c );
+    glUniform3i( uniformLocation, a, b, c );
 }
 
 
 void DGLShader::setUniformInt( const char* uniformName, int a, int b, int c, int d )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniform4i( uniformLocation, a, b, c, d );
+    glUniform4i( uniformLocation, a, b, c, d );
 }
 
 
 void DGLShader::setUniformIntArray( const char* uniformName, int elementCount, int arrayLength, int* arrayData )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
     if( elementCount == 1 )
-        glf->glUniform1iv( uniformLocation, arrayLength, arrayData );
+        glUniform1iv( uniformLocation, arrayLength, arrayData );
 
     else if( elementCount == 2 )
-        glf->glUniform2iv( uniformLocation, arrayLength, arrayData );
+        glUniform2iv( uniformLocation, arrayLength, arrayData );
 
     else if( elementCount == 3 )
-        glf->glUniform3iv( uniformLocation, arrayLength, arrayData );
+        glUniform3iv( uniformLocation, arrayLength, arrayData );
 
     else if( elementCount == 4 )
-        glf->glUniform4iv( uniformLocation, arrayLength, arrayData );
+        glUniform4iv( uniformLocation, arrayLength, arrayData );
 
     else return;
 }
@@ -518,20 +518,20 @@ void DGLShader::setUniformIntArray( const char* uniformName, int elementCount, i
 
 void DGLShader::setUniformMatrix4( const char* uniformName, float* matrix )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniformMatrix4fv( uniformLocation, 1, false, matrix );
+    glUniformMatrix4fv( uniformLocation, 1, false, matrix );
 }
 
 void DGLShader::setUniformMatrix3( const char* uniformName, float* matrix )
 {
-    GLint uniformLocation = glf->glGetUniformLocation( _programID, uniformName );
+    GLint uniformLocation = glGetUniformLocation( _programID, uniformName );
     if( uniformLocation == -1 )
         return;
 
-    glf->glUniformMatrix3fv( uniformLocation, 1, false, matrix );
+    glUniformMatrix3fv( uniformLocation, 1, false, matrix );
 }
 
 
@@ -560,5 +560,5 @@ bool DGLShader::readFile( std::string filename, std::string& contents )
 
 int DGLShader::getAttribLocation(const char* name) const
 {
-    return glf->glGetAttribLocation(_programID, name);
+    return glGetAttribLocation(_programID, name);
 }

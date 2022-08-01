@@ -60,13 +60,6 @@ infringement.
 #define QUOTE_AND_EXPAND(a) QUOTE(a)
 #define OPENGL_CORE_FUNCS_INCLUDE QUOTE_AND_EXPAND(OPENGL_CORE_FUNCS)
 
-#include <QOpenGLContext>
-#include <QSurfaceFormat>
-#include <QWindow>
-
-#include OPENGL_CORE_FUNCS_INCLUDE
-
-#include "ShowingBase.h"
 #include "glerror.h"
 
 /*

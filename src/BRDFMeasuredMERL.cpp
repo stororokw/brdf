@@ -84,8 +84,8 @@ BRDFMeasuredMERL::BRDFMeasuredMERL()
 
 BRDFMeasuredMERL::~BRDFMeasuredMERL()
 {
-    glf->glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-    glf->glDeleteBuffers( 1, &tbo);
+    glBindBuffer(GL_TEXTURE_BUFFER, tbo);
+    glDeleteBuffers( 1, &tbo);
 }
 
 
@@ -152,26 +152,26 @@ void BRDFMeasuredMERL::initGL()
         return;
 
     // create buffer object
-    glf->glGenBuffers(1, &tbo);
-    glf->glBindBuffer(GL_TEXTURE_BUFFER, tbo);
+    glGenBuffers(1, &tbo);
+    glBindBuffer(GL_TEXTURE_BUFFER, tbo);
 
     // initialize buffer object
     unsigned int numBytes = numBRDFSamples * 3 * sizeof(float);
     //printf( "size = %d bytes (%f megs)\n", numBytes, float(numBytes) / 1048576.0f );
-    glf->glBufferData( GL_TEXTURE_BUFFER, numBytes, 0, GL_STATIC_DRAW );
+    glBufferData( GL_TEXTURE_BUFFER, numBytes, 0, GL_STATIC_DRAW );
 
     //tex
-    glf->glGenTextures(1, &tex);
-    glf->glBindTexture(GL_TEXTURE_BUFFER, tex);
-    glf->glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, tbo);
-    glf->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_BUFFER, tex);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, tbo);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
-    glf->glBindBuffer(GL_TEXTURE_BUFFER, tbo);
-    float* p = (float*)glf->glMapBuffer( GL_TEXTURE_BUFFER, GL_WRITE_ONLY );
+    glBindBuffer(GL_TEXTURE_BUFFER, tbo);
+    float* p = (float*)glMapBuffer( GL_TEXTURE_BUFFER, GL_WRITE_ONLY );
 
     memcpy( p, brdfData, numBytes );
-    glf->glUnmapBuffer(GL_TEXTURE_BUFFER);
-    glf->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    glUnmapBuffer(GL_TEXTURE_BUFFER);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
     delete[] brdfData;
     brdfData = NULL;

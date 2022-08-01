@@ -8,10 +8,24 @@ set(EXT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext")
 add_executable(brdf 
 
   # Header files
+  include/brdf/BRDFAnalytic.h
+  include/brdf/BRDFBase.h
+  include/brdf/BRDFImageSlice.h
+  include/brdf/BRDFMeasuredAniso.h
+  include/brdf/BRDFMeasuredMERL.h
+  include/brdf/DGLShader.h
   include/brdf/Paths.h
+  include/brdf/MainWindow.h
   
   # Source files
+  src/BRDFAnalytic.cpp
+  src/BRDFBase.cpp
+  src/BRDFImageSlice.cpp
+  src/BRDFMeasuredAniso.cpp
+  src/BRDFMeasuredMERL.cpp
+  src/DGLShader.cpp
   src/Paths.cpp
+  src/MainWindow.cpp
   src/main.cpp
   )
 

@@ -49,7 +49,7 @@ infringement.
 #include <string>
 #include "BRDFBase.h"
 
-class BRDFMeasuredMERL : public BRDFBase, public GLContext
+class BRDFMeasuredMERL : public BRDFBase
 {
 public:
 
